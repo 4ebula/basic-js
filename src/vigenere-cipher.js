@@ -1,54 +1,45 @@
 const CustomError = require("../extensions/custom-error");
 
 class VigenereCipheringMachine {
-  constructor(direct = true, way = true){
+  constructor(direct = true){
     this.direct = direct;
-    this.way = way;
   }
   encrypt(message, key) {
     if(message === undefined || key === undefined) throw new Error;
-    message = message.toUpperCase();
-    key = key.toUpperCase();
-    if(message.length > key.length) key = key.repeat(Math.ceil(message.length / key.length));
-    let result = [];
-    for (let i = 0, j = 0; i < message.length; i++, j++) {
-      if(message[i] == ' '){
-        j--; 
-        result.push(' ');
-        continue;
-      }
-      else result.push(this.cipher(message[i], key[j]));
-    }
-    !this.direct && result.reverse();
-    return result.join('');
+    return this.handler(message, key, true);
   }    
   decrypt(encryptedMessage, key) {
     if(encryptedMessage === undefined || key === undefined) throw new Error;
-    let message = encryptedMessage.toUpperCase();
+    return this.handler(encryptedMessage, key, false);
+  }
+  handler (msg, key, way){
+    msg = msg.toUpperCase();
     key = key.toUpperCase();
-    if(message.length > key.length) key = key.repeat(Math.ceil(message.length / key.length));
+    if(msg.length > key.length) key = key.repeat(Math.ceil(msg.length / key.length));
     let result = [];
-    for (let i = 0, j = 0; i < message.length; i++, j++) {
-      if(message[i] == ' '){
+    for (let i = 0, j = 0; i < msg.length; i++, j++) {
+      if(msg[i] == ' '){
         j--; 
         result.push(' ');
         continue;
       }
-      else result.push(this.decipher(message[i], key[j]));
+      else result.push(this.cipher(msg[i], key[j], way));
     }
     !this.direct && result.reverse();
     return result.join('');
   }
-  cipher (a, b){
+  cipher (a, b, way){
     if(a.charCodeAt() > 90 || a.charCodeAt() < 65) return a;
-    let sum = a.charCodeAt() + b.charCodeAt();
-    sum -= sum > 155 ? 91 : 65;
-    return String.fromCharCode(sum);
-  }
-  decipher (a, b){
-    if(a.charCodeAt() > 90 || a.charCodeAt() < 65) return a;
-    let sum = a.charCodeAt() - b.charCodeAt();
-    sum += sum < 0 ? 91 : 65;
+    let sum;
+    if(way){
+      sum = a.charCodeAt() + b.charCodeAt();
+      sum -= sum > 155 ? 91 : 65;
+    }
+    else{
+      sum = a.charCodeAt() - b.charCodeAt();
+      sum += sum < 0 ? 91 : 65;
+
+    }
     return String.fromCharCode(sum);
   }
 }
